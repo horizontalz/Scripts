@@ -1,5 +1,27 @@
 #!/bin/sh
 
+# Create locadmin account
+dscl . -create /Users/techsupport
+dscl . -create /Users/techsupport UserShell /bin/bash
+dscl . -create /Users/techsupport RealName "Tech Support"
+dscl . -create /Users/techsupport picture "/Library/User Pictures/Fun/PAUSD.tif"
+dscl . -create /Users/techsupport UniqueID 501
+dscl . -create /Users/techsupport PrimaryGroupID 1000
+dscl . -create /Users/techsupport NFSHomeDirectory /Users/techsupport
+dscl . -passwd /Users/techsupport 
+dscl . -append /Groups/admin GroupMembership techsupport
+
+# Create smarterbalanced account
+dscl . -create /Users/smarterbalanced
+dscl . -create /Users/smarterbalanced RealName "Smarter Balanced"
+dscl . -create /Users/smarterbalanced hint "Password Hint"
+dscl . -create /Users/smarterbalanced picture "/Library/User Pictures/Fun/smarterbalanced.tif"
+dscl . passwd /Users/smarterbalanced testing
+dscl . -create /Users/smarterbalanced UniqueID 499
+dscl . -create /Users/smarterbalanced PrimaryGroupID 20
+dscl . -create /Users/smarterbalanced UserShell /bin/bash
+dscl . -create /Users/smarterbalanced NFSHomeDirectory /Users/smarterbalanced
+
  ##### Begin Declare Variables Used by Script #####
 
 # Declare '$defaults'.
@@ -8,7 +30,7 @@ defaults="/usr/bin/defaults"
 systemsetup="/usr/sbin/systemsetup"
 kickstart="/System/Library/CoreServices/RemoteManagement/ARDAgent.app/Contents/Resources/kickstart"
 # Define '$networksetup'.
-networksetup="/usr/sbin/$networksetup"
+networksetup="/usr/sbin/networksetup"
 
 ##### End Declare Variables Used by Script #####
 
@@ -63,10 +85,10 @@ $defaults write com.apple.TimeMachine DoNotOfferNewDisksForBackup 1
 $defaults write /Library/Preferences/com.apple.loginwindow Hide500Users -bool TRUE
 
 # Get "Wi-Fi" or "Airport" based on your OS
-wservice=`/usr/sbin/$networksetup -listallnetworkservices | grep -Ei '(Wi-Fi|AirPort)'`
+wservice=`$networksetup -listallnetworkservices | grep -Ei '(Wi-Fi|AirPort)'`
 
 # Get port (usually en1)
-whwport=`/usr/sbin/$networksetup -listallhardwareports | awk "/$wservice/,/Ethernet Address/" | awk 'NR==2' | cut -d " " -f 2`
+whwport=`$networksetup -listallhardwareports | awk "/$wservice/,/Ethernet Address/" | awk 'NR==2' | cut -d " " -f 2`
 
 # Set admin password to change Wi-Fi settings
 /usr/libexec/airportd "$whwport" prefs DisconnectOnLogout=No JoinMode=Automatic JoinModeFallback=DoNothing RememberRecentNetworks=Yes RequireAdminIBSS=Yes RequireAdminNetworkChange=Yes RequireAdminPowerToggle=Yes
@@ -133,150 +155,14 @@ launchctl load -w /System/Library/LaunchDaemons/ssh.plist
 # ARD Configuration
 #Enable ARD for localadmin
 $kickstart -configure -allowAccessFor -specifiedUsers
-$kickstart -activate -configure -access -on -users "techsupport" -privs -all -restart -agent
+$kickstart -activate -configure -access -on -users "techsupport" -privs -all -restart -#agent
 
 # Start default installations policy
-jamf policy -trigger default
+#jamf policy -trigger default
 
 #osascript -e "set Volume 10"
 say "Firstboot script done."
 
-#!/bin/sh
-
-# Standard settings for images.
-# Script is meant to be run as a postflight script in a .pkg file. Also installs startup settings script as a Launchd item which is inside the package /Contents/Resources directory.
-
-# Create locadmin account
-dscl . -create /Users/techsupport
-dscl . -create /Users/techsupport UserShell /bin/bash
-dscl . -create /Users/techsupport RealName "Tech Support"
-dscl . -create /Users/techsupport picture "/Library/User Pictures/Fun/PAUSD.tif"
-dscl . -create /Users/techsupport UniqueID 501
-dscl . -create /Users/techsupport PrimaryGroupID 1000
-dscl . -create /Users/techsupport NFSHomeDirectory /Users/techsupport
-dscl . -passwd /Users/techsupport t3cH15!
-dscl . -append /Groups/admin GroupMembership techsupport
-
-# Create smarterbalanced account
-dscl . -create /Users/smarterbalanced
-dscl . -create /Users/smarterbalanced RealName "Smarter Balanced"
-dscl . -create /Users/smarterbalanced hint "Password Hint"
-dscl . -create /Users/smarterbalanced picture "/Library/User Pictures/Fun/smarterbalanced.tif"
-dscl . passwd /Users/smarterbalanced testing
-dscl . -create /Users/smarterbalanced UniqueID 509
-dscl . -create /Users/smarterbalanced PrimaryGroupID 20
-dscl . -create /Users/smarterbalanced UserShell /bin/bash
-dscl . -create /Users/smarterbalanced NFSHomeDirectory /Users/smarterbalanced
-
-# Checks the system default user template for the presence of 
-# the Library/Preferences directory. If the directory is not found, 
-# it is created.
-
-for USER_TEMPLATE in "/System/Library/User Template"/*
-  do
-     if [ ! -d "${USER_TEMPLATE}"/Library/Preferences ]
-      then
-        mkdir -p "${USER_TEMPLATE}"/Library/Preferences
-     fi
-     if [ ! -d "${USER_TEMPLATE}"/Library/Preferences/ByHost ]
-      then
-        mkdir -p "${USER_TEMPLATE}"/Library/Preferences/ByHost
-     fi
-  done
-
-# Checks the existing user folders in /Users for the presence of
-# the Library/Preferences directory. If the directory is not found, 
-# it is created.
-
-#for USER_HOME in /Users/*
-  #do
-    #USER_UID=`basename "${USER_HOME}"`
-    #if [ ! "${USER_UID}" = "Shared" ] 
-     #then 
-      #if [ ! -d "${USER_HOME}"/Library/Preferences ]
-       #then
-        #mkdir -p "${USER_HOME}"/Library/Preferences
-        #chown "${USER_UID}" "${USER_HOME}"/Library
-        #chown "${USER_UID}" "${USER_HOME}"/Library/Preferences
-      #fi
-      #if [ ! -d "${USER_HOME}"/Library/Preferences/ByHost ]
-       #then
-        #mkdir -p "${USER_HOME}"/Library/Preferences/ByHost
-        #chown "${USER_UID}" "${USER_HOME}"/Library
-        #chown "${USER_UID}" "${USER_HOME}"/Library/Preferences
-	#chown "${USER_UID}" "${USER_HOME}"/Library/Preferences/ByHost
-      #fi
-    #fi
-  #done
-
-##### Begin Declare Variables Used by Script #####
-
-# Declare 'defaults'.
-defaults="/usr/bin/defaults"
-# Declare directory variables.
-PKG_DIR="$1/Contents/Resources"
-SCRIPTS_DIR="$3/Library/Scripts/PAUSD"
-LAUNCHD_DIR="$3/Library/LaunchDaemons"
-PRIVETC_DIR="$3/private/etc"
-PREFS_DIR="$3/Library/Preferences"
-USERPREFS_DIR="$3/System/Library/User Template/English.lproj/Library/Preferences"
-NONLOC_USERPREFS_DIR="$3/System/Library/User Template/Non_localized/Library/Preferences"
-ROOT="$3/"
-UPDATE_DYLD="$3/usr/bin/update_dyld_shared_cache" # Set variable to location of update_dyld_shared_cache command on target volume.
-
-##### End Declare Variables Used by Script #####
- 
-##### Begin Preference Setting #####
- 
-# These settings can be set on the target volume before startup.
- 
-# Run update_dyld_shared_cache
-$UPDATE_DYLD -universal_boot -root $ROOT
- 
-# Display login window as Name and Password.
-$defaults write "${PREFS_DIR}/com.apple.loginwindow" SHOWFULLNAME -bool false
- 
-#Starts the Flurry screensaver over the login window when idle for 60 seconds
-$defaults write "${PREFS_DIR}/com.apple.screensaver" loginWindowIdleTime -int 60
-$defaults write "${PREFS_DIR}/com.apple.screensaver" loginWindowModulePath "/System/Library/Screen Savers/Flurry.saver"
- 
-# Set Safari Preferences.
-$defaults write "${USERPREFS_DIR}/com.apple.Safari" HomePage "http://www.pausd.org/"
-$defaults write "${USERPREFS_DIR}/com.apple.Safari" ShowStatusBar -bool YES
- 
-# Set Finder Preferences.
-$defaults write "${USERPREFS_DIR}/com.apple.finder" ShowMountedServersOnDesktop -bool YES
-$defaults write "${USERPREFS_DIR}/com.apple.finder" ShowHardDrivesOnDesktop -bool YES
-$defaults write "${USERPREFS_DIR}/com.apple.finder" ShowStatusBar -bool YES
-
-# Enables Double Click Title bar to Minimize Window
-$defaults write "${NONLOC_USERPREFS_DIR}/.GlobalPreferences" AppleMiniaturizeOnDoubleClick -bool TRUE
- 
-# No .ds-store files on Network Shares
-$defaults write "${PREFS_DIR}/com.apple.desktopservices" DSDontWriteNetworkStores true
- 
-# Globally Set Expanded Print Dialogue Box.
-$defaults write "${PREFS_DIR}/.GlobalPreferences" PMPrintingExpandedStateForPrint -bool TRUE
-
-# Globally Set Always Show Scroll Bars.
-$defaults write "${PREFS_DIR}/.GlobalPreferences" AppleShowScrollBars -string Always
-
-# Disable Mouse reverse scrolling.
-# $defaults write "${USERPREFS_DIR}/.GlobalPreferences" com.apple.swipescrolldirection -bool false
-
-# Set Dark UI
-VersionCheck=$(sw_vers -productVersion | cut -c 1-5)
-VERSION=10.10
-if [[ "$VERSION" == "$VersionCheck" ]]
-	then
-$defaults write "${USERPREFS_DIR}/.GlobalPreferences" AppleInterfaceStyle -string Dark
-fi
- 
-# Disable Time Machine Offers.
-$defaults write "${PREFS_DIR}/com.apple.TimeMachine" DoNotOfferNewDisksForBackup -bool YES
- 
-# Disable Time Machine AutoBackup
-$defaults write "${PREFS_DIR}/com.apple.TimeMachine" AutoBackup 0
-
-# Firewall Settings | 0 = Off | 1 = On For Specific Services | 2 = On For Essential Services
-$defaults write "${PREFS_DIR}/com.apple.alf" globalstate -int 0
+# Delete the script and the launchd item.
+srm /Library/LaunchDaemons/org.pausd.firstboot.plist
+srm "$0"
