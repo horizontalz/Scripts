@@ -145,20 +145,67 @@ say "Firstboot script done."
 
 # Standard settings for images.
 # Script is meant to be run as a postflight script in a .pkg file. Also installs startup settings script as a Launchd item which is inside the package /Contents/Resources directory.
- 
+
+# Checks the system default user template for the presence of 
+# the Library/Preferences directory. If the directory is not found, 
+# it is created.
+
+for USER_TEMPLATE in "/System/Library/User Template"/*
+  do
+     if [ ! -d "${USER_TEMPLATE}"/Library/Preferences ]
+      then
+        mkdir -p "${USER_TEMPLATE}"/Library/Preferences
+     fi
+     if [ ! -d "${USER_TEMPLATE}"/Library/Preferences/ByHost ]
+      then
+        mkdir -p "${USER_TEMPLATE}"/Library/Preferences/ByHost
+     fi
+  done
+
+# Checks the existing user folders in /Users for the presence of
+# the Library/Preferences directory. If the directory is not found, 
+# it is created.
+
+for USER_HOME in /Users/*
+  do
+    USER_UID=`basename "${USER_HOME}"`
+    if [ ! "${USER_UID}" = "Shared" ] 
+     then 
+      if [ ! -d "${USER_HOME}"/Library/Preferences ]
+       then
+        mkdir -p "${USER_HOME}"/Library/Preferences
+        chown "${USER_UID}" "${USER_HOME}"/Library
+        chown "${USER_UID}" "${USER_HOME}"/Library/Preferences
+      fi
+      if [ ! -d "${USER_HOME}"/Library/Preferences/ByHost ]
+       then
+        mkdir -p "${USER_HOME}"/Library/Preferences/ByHost
+        chown "${USER_UID}" "${USER_HOME}"/Library
+        chown "${USER_UID}" "${USER_HOME}"/Library/Preferences
+	chown "${USER_UID}" "${USER_HOME}"/Library/Preferences/ByHost
+      fi
+      if [ -d "${USER_HOME}"/Library/Preferences/ByHost ]
+       then
+        chown "${USER_UID}" "${USER_HOME}"/Library/Preferences/.GlobalPreferences.*
+      fi
+    fi
+  done
+
 ##### Begin Declare Variables Used by Script #####
 
 # Declare 'defaults'.
 defaults="/usr/bin/defaults"
- 
 # Declare directory variables.
-
+PKG_DIR="$1/Contents/Resources"
+SCRIPTS_DIR="$3/Library/Scripts/PAUSD"
+LAUNCHD_DIR="$3/Library/LaunchDaemons"
+PRIVETC_DIR="$3/private/etc"
 PREFS_DIR="$3/Library/Preferences"
 USERPREFS_DIR="$3/System/Library/User Template/English.lproj/Library/Preferences"
 NONLOC_USERPREFS_DIR="$3/System/Library/User Template/Non_localized/Library/Preferences"
 ROOT="$3/"
 UPDATE_DYLD="$3/usr/bin/update_dyld_shared_cache" # Set variable to location of update_dyld_shared_cache command on target volume.
- 
+
 ##### End Declare Variables Used by Script #####
  
 ##### Begin Preference Setting #####
@@ -215,4 +262,3 @@ $defaults write "${PREFS_DIR}/com.apple.TimeMachine" AutoBackup 0
 
 # Firewall Settings | 0 = Off | 1 = On For Specific Services | 2 = On For Essential Services
 $defaults write "${PREFS_DIR}/com.apple.alf" globalstate -int 0
-
