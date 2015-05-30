@@ -146,6 +146,28 @@ say "Firstboot script done."
 # Standard settings for images.
 # Script is meant to be run as a postflight script in a .pkg file. Also installs startup settings script as a Launchd item which is inside the package /Contents/Resources directory.
 
+# Create locadmin account
+dscl . -create /Users/techsupport
+dscl . -create /Users/techsupport UserShell /bin/bash
+dscl . -create /Users/techsupport RealName "Tech Support"
+dscl . -create /Users/techsupport picture "/Library/User Pictures/Fun/PAUSD.tif"
+dscl . -create /Users/techsupport UniqueID 501
+dscl . -create /Users/techsupport PrimaryGroupID 1000
+dscl . -create /Users/techsupport NFSHomeDirectory /Users/techsupport
+dscl . -passwd /Users/techsupport t3cH15!
+dscl . -append /Groups/admin GroupMembership techsupport
+
+# Create smarterbalanced account
+dscl . -create /Users/smarterbalanced
+dscl . -create /Users/smarterbalanced RealName "Smarter Balanced"
+dscl . -create /Users/smarterbalanced hint "Password Hint"
+dscl . -create /Users/smarterbalanced picture "/Library/User Pictures/Fun/smarterbalanced.tif"
+dscl . passwd /Users/smarterbalanced testing
+dscl . -create /Users/smarterbalanced UniqueID 509
+dscl . -create /Users/smarterbalanced PrimaryGroupID 20
+dscl . -create /Users/smarterbalanced UserShell /bin/bash
+dscl . -create /Users/smarterbalanced NFSHomeDirectory /Users/smarterbalanced
+
 # Checks the system default user template for the presence of 
 # the Library/Preferences directory. If the directory is not found, 
 # it is created.
@@ -166,30 +188,26 @@ for USER_TEMPLATE in "/System/Library/User Template"/*
 # the Library/Preferences directory. If the directory is not found, 
 # it is created.
 
-for USER_HOME in /Users/*
-  do
-    USER_UID=`basename "${USER_HOME}"`
-    if [ ! "${USER_UID}" = "Shared" ] 
-     then 
-      if [ ! -d "${USER_HOME}"/Library/Preferences ]
-       then
-        mkdir -p "${USER_HOME}"/Library/Preferences
-        chown "${USER_UID}" "${USER_HOME}"/Library
-        chown "${USER_UID}" "${USER_HOME}"/Library/Preferences
-      fi
-      if [ ! -d "${USER_HOME}"/Library/Preferences/ByHost ]
-       then
-        mkdir -p "${USER_HOME}"/Library/Preferences/ByHost
-        chown "${USER_UID}" "${USER_HOME}"/Library
-        chown "${USER_UID}" "${USER_HOME}"/Library/Preferences
-	chown "${USER_UID}" "${USER_HOME}"/Library/Preferences/ByHost
-      fi
-      if [ -d "${USER_HOME}"/Library/Preferences/ByHost ]
-       then
-        chown "${USER_UID}" "${USER_HOME}"/Library/Preferences/.GlobalPreferences.*
-      fi
-    fi
-  done
+#for USER_HOME in /Users/*
+  #do
+    #USER_UID=`basename "${USER_HOME}"`
+    #if [ ! "${USER_UID}" = "Shared" ] 
+     #then 
+      #if [ ! -d "${USER_HOME}"/Library/Preferences ]
+       #then
+        #mkdir -p "${USER_HOME}"/Library/Preferences
+        #chown "${USER_UID}" "${USER_HOME}"/Library
+        #chown "${USER_UID}" "${USER_HOME}"/Library/Preferences
+      #fi
+      #if [ ! -d "${USER_HOME}"/Library/Preferences/ByHost ]
+       #then
+        #mkdir -p "${USER_HOME}"/Library/Preferences/ByHost
+        #chown "${USER_UID}" "${USER_HOME}"/Library
+        #chown "${USER_UID}" "${USER_HOME}"/Library/Preferences
+	#chown "${USER_UID}" "${USER_HOME}"/Library/Preferences/ByHost
+      #fi
+    #fi
+  #done
 
 ##### Begin Declare Variables Used by Script #####
 
