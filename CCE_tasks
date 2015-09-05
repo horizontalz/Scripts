@@ -1,0 +1,51 @@
+#!/bin/sh
+
+HELPER=`/Library/Application\ Support/JAMF/bin/jamfHelper.app/Contents/MacOS/jamfHelper -windowType utility -icon /Library/Application\ Support/JAMF/bin/jamfHelper.app/Contents/Resources/Message.png -heading Install\ a\ Third\ Party\ Browser\  -description Select\ a\ third\ party\ browser\ to\ install\  -button1 Firefox -button2 Chrome`
+
+
+      echo "jamf helper result was $HELPER";
+
+      if [ "$HELPER" == "0" ]; then
+         /usr/sbin/jamf policy -trigger firefox
+         exit 0
+      else
+         /usr/sbin/jamf policy -trigger chrome   
+     exit 1
+      fi
+
+
+
+#!/bin/sh
+user=$(stat -f%Su /dev/console)
+computername=$(hostname)
+
+
+curl -X PUT -H "Accept: application/xml" -H "Content-type: application/xml" -k -u jamfadmin:Jamf1234 -d "<computer><location><username>$user</username></location></computer>" https://192.168.10.55:8443/JSSResource/computers/name/$computername
+
+#!/bin/sh
+
+CURRENT=$(ls /Applications | wc -l)
+LAST=$(cat /var/appnum.txt)
+
+if [[ $CURRENT -gt $LAST ]]
+then 
+jamf recon
+
+elif [[ $CURRENT -lt $LAST ]]
+then 
+jamf recon
+
+fi
+
+##update number of apps
+ls /Applications | wc -l > /var/appnum.txt
+
+#!/bin/sh
+DT=$(date +"%I:%M:%S")
+NAME=$(hostname)
+user=$(stat -f%Su /dev/console)
+
+
+opensnoop | grep "cfprefs" > /var/$NAME-$user-$DT.txt &
+
+atsutil (font fresh)
