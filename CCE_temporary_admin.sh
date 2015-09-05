@@ -15,8 +15,6 @@ is_user_admin=$(for i in "${arr[@]}"; do echo $i; done | tail -n +2 | grep $user
 cat <<EOF >/var/foo.sh
 #!/bin/sh
 killall sleep
-defaults delete com.apple.loginwindow LogoutHook
-rm /var/foo.sh
 EOF
 ## Make script executable
 chmod u+x /var/foo.sh
