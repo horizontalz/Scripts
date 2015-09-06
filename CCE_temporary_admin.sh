@@ -24,13 +24,15 @@ defaults write com.apple.loginwindow LogoutHook /var/foo.sh
 ## If no output, then user is not admin
 if [ -z "$is_user_admin" ]; then
 ## Add user to admin group
-dscl . -append /Groups/admin GroupMembership $user
+/usr/sbin/dseditgroup -o edit -a $user -t user admin
+## dscl . -append /Groups/admin GroupMembership $user
 ## Enable logging in background and print to timestamped txt file in /var
 opensnoop > /var/$COMPNAME-$user-$DT.txt &
 ## Set temporary access time in seconds
 sleep 120
 ## Demote user from administrator
-dscl . -delete /Groups/admin GroupMembership $user
+/usr/sbin/dseditgroup -o edit -d $user -t user admin
+## dscl . -delete /Groups/admin GroupMembership $user
 ## Stop logging
 killall dtrace
 ## Remove logout hook
