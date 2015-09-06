@@ -25,6 +25,7 @@ defaults write com.apple.loginwindow LogoutHook /var/foo.sh
 if [ -z "$is_user_admin" ]; then
 ## Add user to admin group
 /usr/sbin/dseditgroup -o edit -a $user -t user admin
+osascript -e 'tell app "System Events" to display dialog "You have three minutes of administrative access."'
 ## dscl . -append /Groups/admin GroupMembership $user
 ## Enable logging in background and print to timestamped txt file in /var
 opensnoop > /var/$COMPNAME-$user-$DT.txt &
