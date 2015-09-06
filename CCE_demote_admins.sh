@@ -15,4 +15,4 @@ dscl . -delete /Groups/admin GroupMembership $file_contents
 ## Delete txt file
 rm /Users/dannylee/Desktop/list.txt
 
-fi
+exit 0
