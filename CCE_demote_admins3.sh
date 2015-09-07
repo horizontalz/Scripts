@@ -11,7 +11,7 @@ arr=( $str )
 for i in "${arr[@]}"; do echo $i; done | tail -n +2 | egrep -v $admins > /Users/dannylee/Desktop/list.txt
 for u in $(cat /Users/dannylee/Desktop/list.txt)
  do
-
+## From https://jamfnation.jamfsoftware.com/discussion.html?id=8150
             /usr/sbin/dseditgroup -o edit -d $u -t user admin
             echo Removed $user from admin group
             rm /Users/dannylee/Desktop/list.txt
