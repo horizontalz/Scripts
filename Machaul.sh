@@ -45,6 +45,12 @@ tell application "Finder"
 	end if
 end tell
 
+## Create user folder locally and copy data from external drive
+do shell script "createhomedir -c -u " & shortName & "" with administrator privileges
+
+## Merge folder to /Users
+do shell script "ditto --rsrc " & quotedVolume & " /Users/" & shortName & "/" with administrator privileges
+
 ##Set progress bar
 set n to 10
 set progress total steps to n
@@ -54,12 +60,6 @@ repeat with i from 1 to n
 	delay 1
 	set progress completed steps to i
 end repeat
-
-## Create user folder locally and copy data from external drive
-do shell script "createhomedir -c -u " & shortName & "" with administrator privileges
-
-## Merge folder to /Users
-do shell script "ditto --rsrc " & quotedVolume & " /Users/" & shortName & "/" with administrator privileges
 
 ## Create user with dscl
 do shell script "dscl . -create /Users/" & shortName & "" with administrator privileges
