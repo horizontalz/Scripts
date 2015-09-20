@@ -26,6 +26,15 @@ tell application "Finder"
 	
 end tell
 
+set availiableSize to do shell script "df -b / | grep 'disk1' | awk '{print $4}'"
+set folderSize to do shell script "du -s " & FolderPath & " -print 2>/dev/null | sed 's/[^0-9]*//g'"
+
+if availiableSize is less than folderSize then
+	display dialog "There is not enough disk space to copy this folder over."
+	do shell script "afplay /System/Library/Sounds/Basso.aiff"
+	error number -128
+end if
+
 ##Check if user folder exists already
 set this_folder to "Macintosh HD:Users:" & shortName & ":"
 tell application "Finder"
@@ -33,9 +42,6 @@ tell application "Finder"
 		display dialog "Folder exists.  Please delete existing account then run Machaul again."
 		do shell script "afplay /System/Library/Sounds/Basso.aiff"
 		error number -128
-	else
-		## Create user folder locally and copy data from external drive
-		do shell script "createhomedir -c -u " & shortName & "" with administrator privileges
 	end if
 end tell
 
@@ -48,6 +54,11 @@ repeat with i from 1 to n
 	delay 1
 	set progress completed steps to i
 end repeat
+
+## Create user folder locally and copy data from external drive
+do shell script "createhomedir -c -u " & shortName & "" with administrator privileges
+
+## Merge folder to /Users
 do shell script "ditto --rsrc " & quotedVolume & " /Users/" & shortName & "/" with administrator privileges
 
 ## Create user with dscl
