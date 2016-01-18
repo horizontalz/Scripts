@@ -21,3 +21,16 @@ echo "$i" >> /foo3.txt
 ##jamf install -package "$PKG" -path $DISTROPOINT/"$PKG" -target /
 fi
 done
+
+
+if grep -Fxq /Applications/Maya.app /foo3.txt 
+then
+    say "needs Maya"
+##else
+    # code if not found
+    fi
+
+
+
+##    find $i
+##done
